@@ -45,6 +45,7 @@ public class RegisterActivity extends Activity {
     private String strConfirmPass;
     private String strRegRole;
     private String[] dropDownList = {"trainee", "personaltrainer", "instructor"};
+    private boolean failedRegister;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,6 +65,7 @@ public class RegisterActivity extends Activity {
                 android.R.layout.simple_spinner_dropdown_item, dropDownList);
 
         dropDownSpinner.setAdapter(adapter);
+        failedRegister = false;
 
         session = new SessionController(getApplicationContext());
 
@@ -83,19 +85,28 @@ public class RegisterActivity extends Activity {
                         && !strRegEmail.isEmpty() && !strRegPass.isEmpty()
                         && !strConfirmPass.isEmpty()) {
                     try {
-                        if (strRegPass.equals(strConfirmPass)) {
+                        if (strRegPass.equals(strConfirmPass) && strRegEmail.contains("@") &&
+                                (strRegEmail.contains(".com") || strRegEmail.contains(".edu"))) {
                             if (strRegPass.length() >= 6) {
                                 registerInfo = makeRegisterJsonObject(strRegFirstName,
                                         strRegLastName, strRegEmail, strRegPass, strRegRole);
                             } else {
+                                failedRegister = true;
                                 Toast.makeText(getApplicationContext(), "Your password needs" +
-                                        " to at least 6 characters in length!",
+                                        " to be at least 6 characters in length!",
                                         Toast.LENGTH_LONG).show();
                             }
                         } else {
-                            Toast.makeText(getApplicationContext(), "Your password fields" +
-                                            " do not match",
-                                    Toast.LENGTH_LONG).show();
+                            failedRegister = true;
+                            if (!strRegPass.equals(strConfirmPass)) {
+                                Toast.makeText(getApplicationContext(), "Your password " +
+                                                "fields do not match",
+                                        Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Your email is not " +
+                                                "considered a valid address",
+                                        Toast.LENGTH_LONG).show();
+                            }
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -116,9 +127,11 @@ public class RegisterActivity extends Activity {
                                             LoginActivity.class));
                                     finish();
                                 } else {
-                                    String errorReceived = response.getString("errorMsg");
-                                    Toast.makeText(getApplicationContext(), errorReceived,
-                                            Toast.LENGTH_LONG).show();
+                                    if (!failedRegister) {
+                                        String errorReceived = response.getString("errorMsg");
+                                        Toast.makeText(getApplicationContext(), errorReceived,
+                                                Toast.LENGTH_LONG).show();
+                                    }
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -128,8 +141,8 @@ public class RegisterActivity extends Activity {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             VolleyLog.d(TAG, "Error:" + error.getMessage());
-                            Toast.makeText(getApplicationContext(), "Error: " +
-                                    error.getMessage(), Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getApplicationContext(), "Error: " +
+                            //        error.getMessage(), Toast.LENGTH_LONG).show();
                         }
                     });
                     VolleySingleton.getInstance().addToRequestQueue(jsonRequest, "reg_req");
