@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,6 +24,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import org.json.JSONException;
@@ -256,8 +258,17 @@ public class LoginActivity extends Activity {
                                             dialog.dismiss();
                                         } else {
                                             String errorReceived = response.getString("errorMsg");
-                                            Toast.makeText(getApplicationContext(), errorReceived,
-                                                    Toast.LENGTH_LONG).show();
+                                            Toast.makeText(getApplicationContext(), errorReceived
+                                                    + " A Google account cannot login with an " +
+                                                            "email already associated with the " +
+                                                            "server!", Toast.LENGTH_LONG).show();
+                                            mGoogleSignInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    // ...
+                                                }
+                                            });
+                                            dialog.dismiss();
                                         }
                                     } catch (JSONException e) {
                                         e.printStackTrace();

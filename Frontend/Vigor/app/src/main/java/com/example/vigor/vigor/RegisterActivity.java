@@ -89,7 +89,7 @@ public class RegisterActivity extends Activity {
                                         strRegLastName, strRegEmail, strRegPass, strRegRole);
                             } else {
                                 Toast.makeText(getApplicationContext(), "Your password needs" +
-                                        " to at least 6 characters in length!",
+                                        " to be at least 6 characters in length!",
                                         Toast.LENGTH_LONG).show();
                             }
                         } else {
