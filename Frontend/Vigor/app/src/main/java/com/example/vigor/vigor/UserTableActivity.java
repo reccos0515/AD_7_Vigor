@@ -29,12 +29,14 @@ public class UserTableActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
 
 
+    private SessionController session;
     public static String UserEmailString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_table);
+        session = new SessionController(getApplicationContext());
 
         userEmail = (EditText) findViewById(R.id.UserTableEtManagedUser);
         emailList = (ListView) findViewById(R.id.UserTableLvEmails);
@@ -43,8 +45,17 @@ public class UserTableActivity extends AppCompatActivity {
         emails = FileHelper.readData(this);
 
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, emails);
+        boolean exists = false;
+        for (int i = 0; i<emails.size(); i++){
+            if (emails.get(i).equals("Me")){
+                exists = true;
+            }
+        }
+        if (!exists){
+            adapter.add("Me");
+            FileHelper.writeData(emails, UserTableActivity.this);
+        }
         emailList.setAdapter(adapter);
-
 
         enter.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,31 +84,38 @@ public class UserTableActivity extends AppCompatActivity {
         emailList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                AlertDialog.Builder alert = new AlertDialog.Builder(
-                        UserTableActivity.this);
-                alert.setTitle("Would you like to delete or select this user?");
-                alert.setPositiveButton("SELECT", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        UserEmailString = emails.get(position);
-                        startActivity(new Intent(UserTableActivity.this, TrainerToolsActivity.class));
-                        dialog.dismiss();
-                    }
-                });
-                alert.setNeutralButton("DELETE", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        emails.remove(position);
-                        adapter.notifyDataSetChanged();
-                    }
-                });
-                alert.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                alert.show();
+                if (emails.get(position).equals("Me")){
+                    UserEmailString = session.returnEmail();
+                    startActivity(new Intent(UserTableActivity.this, TrainerToolsActivity.class));
+                } else {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(
+                            UserTableActivity.this);
+                    alert.setTitle("Would you like to delete or select this user?");
+                    alert.setPositiveButton("SELECT", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            UserEmailString = emails.get(position);
+                            startActivity(new Intent(UserTableActivity.this, TrainerToolsActivity.class));
+                            dialog.dismiss();
+                        }
+                    });
+                    alert.setNeutralButton("CANCEL", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    alert.setNegativeButton("DELETE", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            emails.remove(position);
+                            adapter.notifyDataSetChanged();
+                            FileHelper.writeData(emails, UserTableActivity.this);
+                            dialog.dismiss();
+                        }
+                    });
+                    alert.show();
+                }
             }
         });
     }

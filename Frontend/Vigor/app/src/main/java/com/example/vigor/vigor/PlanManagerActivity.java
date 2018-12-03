@@ -1,6 +1,7 @@
 package com.example.vigor.vigor;
 
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -69,7 +71,11 @@ public class PlanManagerActivity extends AppCompatActivity implements android.wi
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PlanManagerActivity.this, PlanCreatorActivity.class));
+                Intent launch = new Intent(PlanManagerActivity.this, PlanCreatorActivity.class);
+                Bundle origin = new Bundle();
+                origin.putBoolean("fromTrainerTools", false);
+                launch.putExtras(origin);
+                startActivityForResult(launch, 1);
             }
         });
 
@@ -83,12 +89,15 @@ public class PlanManagerActivity extends AppCompatActivity implements android.wi
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {
-
+                                    Toast.makeText(getApplicationContext(), "Success",
+                                            Toast.LENGTH_LONG).show();
                             }
                         },
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
+                                    Toast.makeText(getApplicationContext(), "Error" + error.toString(),
+                                            Toast.LENGTH_LONG).show();
                             }
                         });
                 VolleySingleton.getInstance().addToRequestQueue(jsonObjectRequest, "json_req");
@@ -147,14 +156,27 @@ public class PlanManagerActivity extends AppCompatActivity implements android.wi
                 @Override
                 public void onResponse(JSONObject response) {
                     Log.d(TAG, response.toString());
+                    Toast.makeText(getApplicationContext(), "Success",
+                            Toast.LENGTH_LONG).show();
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     VolleyLog.d(TAG, "Error:" + error.getMessage());
+                    Toast.makeText(getApplicationContext(), "Error" + error.toString(),
+                            Toast.LENGTH_LONG).show();
                 }
             });
             VolleySingleton.getInstance().addToRequestQueue(jsonRequest, "json_req");
         }
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        plans = new ArrayList<>();
+        adapter = new CustomPlanAdapter(plans, this);
+        planList.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+        setUpInitialData();
     }
 }

@@ -44,9 +44,11 @@ public class PlanCreatorActivity extends AppCompatActivity {
     private Button next;
     private TextView Day;
     private ListView listView;
+
     private static CustomAdapter adapter;
     public static int index = 0;
     public static String PlanName;
+    private boolean fromTrainerTools = false;
 
     private String TAG = PlanCreatorActivity.class.getSimpleName();
     private SessionController session;
@@ -81,6 +83,14 @@ public class PlanCreatorActivity extends AppCompatActivity {
 
         days = new ArrayList<>();
         dataModels = new ArrayList<>();
+
+        Bundle receivedData = getIntent().getExtras();
+        if (receivedData != null){
+            if (receivedData.getBoolean("fromTrainerTools"))
+                fromTrainerTools = true;
+            else
+                fromTrainerTools = false;
+        }
 
         AlertDialog.Builder alert = new AlertDialog.Builder(
                 PlanCreatorActivity.this);
@@ -264,6 +274,7 @@ public class PlanCreatorActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //Ask user for a plan name
+                savePlan.setClickable(false);
                 AlertDialog.Builder alert = new AlertDialog.Builder(
                         PlanCreatorActivity.this);
                 alert.setTitle("Are you sure about that");
@@ -298,7 +309,7 @@ public class PlanCreatorActivity extends AppCompatActivity {
                                     DataModel tempActivity = (DataModel) temp.get(j);
                                     JSONObject toPut = new JSONObject();
                                     try {
-                                        if (session.returnUserRole().equals("trainee")) {
+                                        if (!fromTrainerTools) {
                                             toPut.put("userEmail", session.returnEmail());
                                             planURL = "http://proj309-ad-07.misc.iastate.edu:8080/userPlan/add";
                                         } else {
@@ -323,15 +334,15 @@ public class PlanCreatorActivity extends AppCompatActivity {
                                 @Override
                                 public void onResponse(JSONArray response) {
                                     Log.d(TAG, response.toString());
-                                    Toast.makeText(getApplicationContext(),response.toString(),
-                                            Toast.LENGTH_LONG).show();
+//                                    Toast.makeText(getApplicationContext(), "Success",
+//                                            Toast.LENGTH_LONG).show();
                                 }
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
                                     Log.d(TAG, "Error; " + error.toString());
-                                    Toast.makeText(getApplicationContext(), "Error: " + error.getMessage(),
-                                            Toast.LENGTH_LONG).show();
+//                                    Toast.makeText(getApplicationContext(), "Error: " + error.getMessage(),
+//                                            Toast.LENGTH_LONG).show();
                                 }
                             });
                             VolleySingleton.getInstance().addToRequestQueue(jsonArrayRequest, "jsonArray_req");
@@ -351,6 +362,7 @@ public class PlanCreatorActivity extends AppCompatActivity {
                 alert.setNegativeButton("NO", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        savePlan.setClickable(true);
                         dialog.dismiss();
                     }
                 });

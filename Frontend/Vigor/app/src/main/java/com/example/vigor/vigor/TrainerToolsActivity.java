@@ -28,7 +28,11 @@ public class TrainerToolsActivity extends AppCompatActivity {
         Plan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(TrainerToolsActivity.this, PlanCreatorActivity.class));
+                Intent launch = new Intent(TrainerToolsActivity.this, PlanCreatorActivity.class);
+                Bundle origin = new Bundle();
+                origin.putBoolean("fromTrainerTools", true);
+                launch.putExtras(origin);
+                startActivity(launch);
             }
         });
 

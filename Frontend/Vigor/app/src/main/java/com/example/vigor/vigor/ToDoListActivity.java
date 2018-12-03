@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -262,11 +263,15 @@ public class ToDoListActivity extends AppCompatActivity {
                                 @Override
                                 public void onResponse(JSONObject response) {
                                     Log.d(TAG, response.toString());
+//                                    Toast.makeText(getApplicationContext(), "Success",
+//                                            Toast.LENGTH_LONG).show();
                                 }
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
                                     VolleyLog.d(TAG, "Error:" + error.getMessage());
+//                                    Toast.makeText(getApplicationContext(), "Error" + error.toString(),
+//                                            Toast.LENGTH_LONG).show();
                                 }
                             });
                             VolleySingleton.getInstance().addToRequestQueue(jsonRequest, "json_req");
