@@ -164,8 +164,43 @@ public class PlanCreatorActivity extends AppCompatActivity {
                                 } else {
                                     AlertDialog.Builder alert = new AlertDialog.Builder(
                                             PlanCreatorActivity.this);
-                                    alert.setTitle("Activity does not exist in our list.");
-                                    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    alert.setTitle("Activity does not exist in our list, would you like to add it?");
+                                    alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            JSONObject tosend = new JSONObject();
+                                            try {
+                                                tosend.put("name", activity.getText().toString());
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                            JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.POST,
+                                                    "http://proj309-ad-07.misc.iastate.edu:8080/exercise/add", tosend, new Response.Listener<JSONObject>() {
+                                                @Override
+                                                public void onResponse(JSONObject response) {
+                                                    Log.d(TAG, response.toString());
+                                                }
+                                            }, new Response.ErrorListener() {
+                                                @Override
+                                                public void onErrorResponse(VolleyError error) {
+                                                    VolleyLog.d(TAG, "Error:" + error.getMessage());
+                                                }
+                                            });
+                                            VolleySingleton.getInstance().addToRequestQueue(jsonRequest, "json_req");
+                                            dataModels.add(new DataModel(
+                                                    UserTableActivity.UserEmailString,
+                                                    PlanName,
+                                                    activity.getText().toString(),
+                                                    sets.getText().toString(),
+                                                    reps.getText().toString()));
+                                            activity.setText("");
+                                            sets.setText("");
+                                            reps.setText("");
+                                            adapter.notifyDataSetChanged();
+                                            dialog.dismiss();
+                                        }
+                                    });
+                                    alert.setNegativeButton("NO", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             dialog.dismiss();
@@ -334,15 +369,11 @@ public class PlanCreatorActivity extends AppCompatActivity {
                                 @Override
                                 public void onResponse(JSONArray response) {
                                     Log.d(TAG, response.toString());
-//                                    Toast.makeText(getApplicationContext(), "Success",
-//                                            Toast.LENGTH_LONG).show();
                                 }
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
                                     Log.d(TAG, "Error; " + error.toString());
-//                                    Toast.makeText(getApplicationContext(), "Error: " + error.getMessage(),
-//                                            Toast.LENGTH_LONG).show();
                                 }
                             });
                             VolleySingleton.getInstance().addToRequestQueue(jsonArrayRequest, "jsonArray_req");

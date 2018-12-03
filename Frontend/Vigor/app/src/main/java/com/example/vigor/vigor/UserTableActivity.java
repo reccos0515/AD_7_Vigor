@@ -86,7 +86,7 @@ public class UserTableActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 if (emails.get(position).equals("Me")){
                     UserEmailString = session.returnEmail();
-                    startActivity(new Intent(UserTableActivity.this, TrainerToolsActivity.class));
+                    startActivity(new Intent(UserTableActivity.this, PlanManagerActivity.class));
                 } else {
                     AlertDialog.Builder alert = new AlertDialog.Builder(
                             UserTableActivity.this);
